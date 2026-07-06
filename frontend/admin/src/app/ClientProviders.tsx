@@ -1,0 +1,19 @@
+"use client";
+
+import { I18nextProvider } from 'react-i18next';
+import i18n from '@/i18n';
+import { ApiProvider } from '@/context/ApiContext';
+
+export default function ClientProviders({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <I18nextProvider i18n={i18n}>
+      <ApiProvider>
+        {children}
+      </ApiProvider>
+    </I18nextProvider>
+  );
+}

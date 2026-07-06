@@ -56,7 +56,7 @@ const HeroSection = () => {
                     {service.icon}
                   </div>
                   <span className="text-sm font-medium text-gray-700">{service.name}</span>
-                </button>
+                </Link>
               ))}
             </div>
           </div>
