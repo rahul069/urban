@@ -1,4 +1,4 @@
-import { Search, MapPin, User, ShieldCheck, FileText, CreditCard, Star, Users } from 'lucide-react';
+import { MapPin, User, ShieldCheck, FileText, CreditCard, Star, Users } from 'lucide-react';
 
 const services = [
   { name: 'Verify Providers', icon: <ShieldCheck className="h-8 w-8 text-gray-600" /> },
