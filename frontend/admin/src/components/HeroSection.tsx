@@ -1,26 +1,28 @@
-import { useHistory } from 'react-router-dom';
+import Link from 'next/link';
 import { MapPin, User, ShieldCheck, FileText, CreditCard, AlertTriangle, FileCheck, Star } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const services = [
   { name: 'Verify Providers', icon: <ShieldCheck className="h-8 w-8 text-gray-600" />, path: '/verification' },
   { name: 'Manage Bookings', icon: <FileText className="h-8 w-8 text-gray-600" />, path: '/bookings' },
-  { name: 'Process Payments', icon: <CreditCard className="h-8 w-8 text-gray-600" />, path: '/payments' },
+  { name: 'Process Payments', icon: <CreditCard className="h-8 w-8 text-gray-600" />, path: '/invoices' },
   { name: 'Resolve Disputes', icon: <AlertTriangle className="h-8 w-8 text-gray-600" />, path: '/disputes' },
 ];
 
 const HeroSection = () => {
-  const history = useHistory();
+  const { t } = useTranslation();
+
   return (
     <div className="bg-white py-12 px-4 sm:px-6 lg:px-8">
       {/* Navbar */}
       <nav className="max-w-7xl mx-auto flex justify-between items-center mb-12">
         <div className="text-2xl font-bold text-gray-900">Urban Home Services</div>
         <div className="hidden md:flex space-x-8">
-          <button onClick={() => history.push('/')} className="text-gray-600 hover:text-gray-900">Dashboard</button>
-          <button onClick={() => history.push('/bookings')} className="text-gray-600 hover:text-gray-900">Bookings</button>
-          <button onClick={() => history.push('/verification')} className="text-gray-600 hover:text-gray-900">Providers</button>
-          <button onClick={() => history.push('/invoices')} className="text-gray-600 hover:text-gray-900">Invoices</button>
-          <button onClick={() => history.push('/disputes')} className="text-gray-600 hover:text-gray-900">Disputes</button>
+          <Link href="/" className="text-gray-600 hover:text-gray-900">Dashboard</Link>
+          <Link href="/bookings" className="text-gray-600 hover:text-gray-900">Bookings</Link>
+          <Link href="/verification" className="text-gray-600 hover:text-gray-900">Providers</Link>
+          <Link href="/invoices" className="text-gray-600 hover:text-gray-900">Invoices</Link>
+          <Link href="/disputes" className="text-gray-600 hover:text-gray-900">Disputes</Link>
         </div>
         <div className="flex items-center space-x-4">
           <div className="flex items-center px-3 py-2 border border-gray-200 rounded-full text-sm">
@@ -37,17 +39,17 @@ const HeroSection = () => {
       <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
         {/* Left Column: Content */}
         <div className="space-y-8">
-          <h1 className="text-4xl font-bold text-gray-900">
-            Germany’s Home Services Marketplace
+            <h1 className="text-4xl font-bold text-gray-900">
+            {t('hero.title')}
           </h1>
 
           {/* Service Grid */}
           <div className="border border-gray-200 rounded-xl p-6 bg-gray-50">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {services.map((service, index) => (
-                <button
+                <Link
                   key={index}
-                  onClick={() => history.push(service.path)}
+                  href={service.path}
                   className="flex flex-col items-center space-y-2 hover:bg-gray-100 p-4 rounded-lg transition"
                 >
                   <div className="p-4 bg-white rounded-lg border border-gray-100 shadow-sm">
