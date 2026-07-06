@@ -1,10 +1,10 @@
-import { MapPin, User, ShieldCheck, FileText, CreditCard, Star, Users } from 'lucide-react';
+import { MapPin, User, ShieldCheck, FileText, CreditCard, AlertTriangle, FileCheck, Star } from 'lucide-react';
 
 const services = [
   { name: 'Verify Providers', icon: <ShieldCheck className="h-8 w-8 text-gray-600" /> },
   { name: 'Manage Bookings', icon: <FileText className="h-8 w-8 text-gray-600" /> },
   { name: 'Process Payments', icon: <CreditCard className="h-8 w-8 text-gray-600" /> },
-  { name: 'Generate Invoices', icon: <FileText className="h-8 w-8 text-gray-600" /> },
+  { name: 'Resolve Disputes', icon: <AlertTriangle className="h-8 w-8 text-gray-600" /> },
 ];
 
 const HeroSection = () => {
@@ -17,6 +17,8 @@ const HeroSection = () => {
           <a href="#" className="text-gray-600 hover:text-gray-900">Dashboard</a>
           <a href="#" className="text-gray-600 hover:text-gray-900">Bookings</a>
           <a href="#" className="text-gray-600 hover:text-gray-900">Providers</a>
+          <a href="#" className="text-gray-600 hover:text-gray-900">Invoices</a>
+          <a href="#" className="text-gray-600 hover:text-gray-900">Disputes</a>
         </div>
         <div className="flex items-center space-x-4">
           <div className="flex items-center px-3 py-2 border border-gray-200 rounded-full text-sm">
@@ -34,7 +36,7 @@ const HeroSection = () => {
         {/* Left Column: Content */}
         <div className="space-y-8">
           <h1 className="text-4xl font-bold text-gray-900">
-            Manage home services effortlessly
+            Germany’s Home Services Marketplace
           </h1>
 
           {/* Service Grid */}
@@ -54,12 +56,16 @@ const HeroSection = () => {
           {/* Trust Badges */}
           <div className="flex items-center space-x-8">
             <div className="flex items-center space-x-2">
-              <Star className="h-5 w-5 text-yellow-400" />
-              <span className="text-sm font-medium text-gray-700">Trusted by 1000+ providers</span>
+              <FileCheck className="h-5 w-5 text-blue-500" />
+              <span className="text-sm font-medium text-gray-700">GoBD Invoicing</span>
             </div>
             <div className="flex items-center space-x-2">
-              <Users className="h-5 w-5 text-gray-500" />
-              <span className="text-sm font-medium text-gray-700">5000+ bookings processed</span>
+              <ShieldCheck className="h-5 w-5 text-green-500" />
+              <span className="text-sm font-medium text-gray-700">100% Verified Handwerker</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Star className="h-5 w-5 text-yellow-400" />
+              <span className="text-sm font-medium text-gray-700">GDPR Compliant</span>
             </div>
           </div>
         </div>
@@ -67,18 +73,18 @@ const HeroSection = () => {
         {/* Right Column: Image Collage */}
         <div className="grid grid-cols-2 gap-4">
           <img
-            src="https://source.unsplash.com/random/600x400/?home-services"
-            alt="Home services"
+            src="https://source.unsplash.com/random/600x400/?verification"
+            alt="Provider Verification"
             className="rounded-xl object-cover w-full h-64 col-span-2"
           />
           <img
-            src="https://source.unsplash.com/random/600x300/?verification"
-            alt="Provider verification"
+            src="https://source.unsplash.com/random/600x300/?booking"
+            alt="Booking Flow"
             className="rounded-xl object-cover w-full h-48"
           />
           <img
-            src="https://source.unsplash.com/random/600x300/?invoicing"
-            alt="Invoicing"
+            src="https://source.unsplash.com/random/600x300/?invoice"
+            alt="Invoice Generation"
             className="rounded-xl object-cover w-full h-48"
           />
         </div>
