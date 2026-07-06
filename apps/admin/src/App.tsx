@@ -7,7 +7,7 @@ import { ApiProvider } from './context/ApiContext';
 import { AuthProvider } from './context/AuthContext';
 import VerificationQueue from './screens/VerificationQueue';
 import BookingMonitor from './screens/BookingMonitor';
-import './App.css';
+
 
 initI18n();
 
