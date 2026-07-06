@@ -1,0 +1,96 @@
+/* apps/admin/src/App.css */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background: #f5f5f5;
+}
+
+.verification-container, .booking-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.provider-card, .booking-card {
+  background: white;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+button {
+  padding: 8px 12px;
+  margin: 5px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.approve {
+  background: #4CAF50;
+  color: white;
+}
+
+.reject {
+  background: #f44336;
+  color: white;
+}
+
+.status {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8em;
+}
+
+.pending {
+  background: #ffeb3b;
+}
+
+.approved {
+  background: #4CAF50;
+  color: white;
+}
+
+.rejected {
+  background: #f44336;
+  color: white;
+}
+
+.navbar {
+  background: #333;
+  color: white;
+  padding: 10px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar a {
+  color: white;
+  text-decoration: none;
+  margin: 0 10px;
+}
+
+.navbar a:hover {
+  text-decoration: underline;
+}
+
+.language-switcher {
+  display: flex;
+  gap: 10px;
+}
+
+.language-switcher button {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 1em;
+}
+
+.language-switcher button.active {
+  font-weight: bold;
+  text-decoration: underline;
+}

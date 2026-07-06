@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
 import { useApi } from '../context/ApiContext';
 import './BookingMonitor.css';
+import '../App.css';
 
 const BookingMonitor = () => {
   const { t } = useTranslation();

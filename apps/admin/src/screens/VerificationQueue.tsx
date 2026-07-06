@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
 import { useApi } from '../context/ApiContext';
 import './VerificationQueue.css';
+import '../App.css';
 
 const VerificationQueue = () => {
   const { t } = useTranslation();
