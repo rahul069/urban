@@ -1,0 +1,94 @@
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Build outputs
+*.apk
+*.aab
+*.ipa
+*.app
+*.exe
+*.dll
+*.so
+*.dylib
+*.class
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Logs and databases
+*.log
+*.sql
+*.sqlite
+*.db
+*.bak
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Testing
+*.lcov
+coverage/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Large files
+*.node
+*.so
+*.dll
+*.exe
+*.bin
+*.dat
+*.cache
+
+# Node.js specific
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# TypeScript
+*.tsbuildinfo
+
+# Next.js
+.next/
+out/
+
+# Expo
+.expo/
+
+# React Native
+android/app/build/
+ios/build/
+*.hprof
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Linux
+desktop.ini

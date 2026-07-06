@@ -1,0 +1,25 @@
+{
+  "name": "urban",
+  "version": "1.0.0",
+  "description": "- **Backend**: NestJS (or FastAPI) - **Frontend**: React Native (Mobile), Next.js (Web), Next.js (Admin Dashboard) - **Database**: PostgreSQL + PostGIS, Redis - **Infrastructure**: Docker, Kubernetes (Hetzner/AWS Frankfurt) - **CI/CD**: GitHub Actions",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "devDependencies": {
+    "autoprefixer": "^10.5.2",
+    "postcss": "^8.5.16",
+    "tailwindcss": "^4.3.2"
+  },
+  "dependencies": {
+    "axios": "^1.18.1",
+    "form-data": "^4.0.6"
+  }
+}
