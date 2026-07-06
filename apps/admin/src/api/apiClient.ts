@@ -1,11 +1,41 @@
-import UrbanApiClient from '@urban/api-client';
+import simpleApiClient from './simpleApiClient';
 
-// Initialize the API client
-const API_BASE_URL = process.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+export default simpleApiClient;
 
-const apiClient = new UrbanApiClient(API_BASE_URL);
+export const useAuth = () => {
+  const login = async (email: string, password: string) => {
+    const response = await simpleApiClient.login({ email, password });
+    localStorage.setItem('token', response.accessToken);
+    return response;
+  };
+  
+  const logout = () => {
+    localStorage.removeItem('token');
+  };
+  
+  return { login, logout };
+};
 
-export default apiClient;
+export const useProviders = () => {
+  return {
+    getProviders: simpleApiClient.getProviders,
+    getProviderById: simpleApiClient.getProviderById,
+    updateProviderVerification: simpleApiClient.updateProviderVerification,
+  };
+};
 
-export * from '@urban/api-client';
-export { useAuth, useProviders, useBookings, usePayments, useInvoices } from '@urban/api-client';
+export const useBookings = () => {
+  return {
+    getBookings: simpleApiClient.getBookings,
+    getBookingById: simpleApiClient.getBookingById,
+    updateBookingStatus: simpleApiClient.updateBookingStatus,
+  };
+};
+
+export const useInvoices = () => {
+  return {
+    getInvoices: simpleApiClient.getInvoices,
+    getInvoiceById: simpleApiClient.getInvoiceById,
+    generateInvoicePdf: simpleApiClient.generateInvoicePdf,
+  };
+};

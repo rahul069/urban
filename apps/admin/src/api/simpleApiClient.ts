@@ -1,0 +1,57 @@
+import axios from 'axios';
+
+// Simple API client for Admin Dashboard (no React Native dependencies)
+const API_BASE_URL = process.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+
+const apiClient = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Add JWT token to requests if available
+apiClient.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// Response interceptor for error handling
+apiClient.interceptors.response.use(
+  (response) => response.data,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Handle unauthorized
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error.response?.data || error.message);
+  }
+);
+
+export default {
+  // Auth
+  login: (credentials: { email: string; password: string }) => 
+    apiClient.post('/auth/login', credentials),
+  
+  // Providers
+  getProviders: (params?: any) => apiClient.get('/providers', { params }),
+  getProviderById: (id: string) => apiClient.get(`/providers/${id}`),
+  updateProviderVerification: (id: string, status: string) => 
+    apiClient.patch(`/providers/${id}/verification`, { status }),
+  
+  // Bookings
+  getBookings: (params?: any) => apiClient.get('/bookings', { params }),
+  getBookingById: (id: string) => apiClient.get(`/bookings/${id}`),
+  updateBookingStatus: (id: string, status: string) => 
+    apiClient.put(`/bookings/${id}/status`, { status }),
+  
+  // Invoices
+  getInvoices: (params?: any) => apiClient.get('/invoices', { params }),
+  getInvoiceById: (id: string) => apiClient.get(`/invoices/${id}`),
+  generateInvoicePdf: (invoiceId: string) => 
+    apiClient.post(`/invoices/${invoiceId}/generate-pdf`),
+};
