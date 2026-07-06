@@ -15,7 +15,7 @@ const BookingMonitor = () => {
       try {
         setLoading(true);
         // In a real app, we would fetch all bookings
-        const response = await bookings.getBookingsByProvider('all'); // This would be a getAllBookings endpoint
+        await bookings.getBookings(); // Fetch all bookings
         // For now, use mock data structure
         setBookingList([
           {
@@ -68,7 +68,7 @@ const BookingMonitor = () => {
     <div className="booking-container">
       <h1>{t('bookings.title')}</h1>
       <div className="bookings-list">
-        {bookings.map((booking) => (
+        {bookingList.map((booking) => (
           <div key={booking.id} className="booking-card">
             <div className="booking-info">
               <h2>{booking.customer}</h2>

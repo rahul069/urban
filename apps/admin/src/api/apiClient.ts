@@ -5,8 +5,8 @@ export default simpleApiClient;
 export const useAuth = () => {
   const login = async (email: string, password: string) => {
     const response = await simpleApiClient.login({ email, password });
-    localStorage.setItem('token', response.accessToken);
-    return response;
+    localStorage.setItem('token', response.data.accessToken);
+    return response.data;
   };
   
   const logout = () => {

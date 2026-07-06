@@ -15,7 +15,7 @@ const VerificationQueue = () => {
       try {
         setLoading(true);
         // In a real app, we would fetch providers with pending verification
-        const response = await providers.getProviders();
+        await providers.getProviders();
         // For now, use mock data structure
         setVerificationData([
           {
@@ -92,7 +92,7 @@ const VerificationQueue = () => {
     <div className="verification-container">
       <h1>{t('verification.title')}</h1>
       <div className="providers-list">
-        {providers.map((provider) => (
+        {verificationData.map((provider) => (
           <div key={provider.id} className="provider-card">
             <h2>{provider.name}</h2>
             <div className="documents-list">

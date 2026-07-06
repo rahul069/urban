@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useMemo } from 'react';
-import { useAuth } from '../api/apiClient';
+
 import apiClient from '../api/apiClient';
 
 interface AuthContextType {
@@ -14,17 +14,18 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const auth = useAuth(apiClient);
+  const { login } = apiClient;
+  const logout = async () => localStorage.removeItem('token');
+
 
   const value = useMemo(() => ({
-    ...auth,
-    login: auth.login,
-    logout: auth.logout,
-    isAuthenticated: auth.isAuthenticated,
-    user: auth.user,
-    loading: auth.loading,
-    error: auth.error,
-  }), [auth]);
+    login,
+    logout,
+    isAuthenticated: !!localStorage.getItem('token'),
+    user: null,
+    loading: false,
+    error: null,
+  }), []);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
