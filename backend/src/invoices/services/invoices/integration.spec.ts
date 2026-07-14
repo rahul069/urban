@@ -24,11 +24,11 @@ const mockBookingsService = {
 };
 
 const mockProvidersService = {
-  getProviderById: jest.fn(),
+  findOne: jest.fn(),
 };
 
 const mockCustomersService = {
-  getCustomerById: jest.fn(),
+  findOne: jest.fn(),
 };
 
 const mockStorageService = {
@@ -129,8 +129,8 @@ describe('InvoicesService Integration', () => {
       // Mock repository and service calls
       mockInvoiceRepository.findOne.mockResolvedValue(testInvoice);
       mockBookingsService.getBookingById.mockResolvedValue(testBooking);
-      mockProvidersService.getProviderById.mockResolvedValue(testProvider);
-      mockCustomersService.getCustomerById.mockResolvedValue(testCustomer);
+      mockProvidersService.findOne.mockResolvedValue(testProvider);
+      mockCustomersService.findOne.mockResolvedValue(testCustomer);
       mockStorageService.uploadFile.mockResolvedValue('https://storage.example.com/invoices/test-invoice.pdf');
       
       // Test PDF generation
@@ -198,8 +198,8 @@ describe('InvoicesService Integration', () => {
       // Mock repository and service calls
       mockInvoiceRepository.findOne.mockResolvedValue(testInvoice);
       mockBookingsService.getBookingById.mockResolvedValue(testBooking);
-      mockProvidersService.getProviderById.mockResolvedValue(testProvider);
-      mockCustomersService.getCustomerById.mockResolvedValue(testCustomer);
+      mockProvidersService.findOne.mockResolvedValue(testProvider);
+      mockCustomersService.findOne.mockResolvedValue(testCustomer);
       mockStorageService.uploadFile.mockResolvedValue('https://storage.example.com/invoices/test-invoice.xml');
       
       // Test XML generation

@@ -1,7 +1,7 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ProvidersService } from './services/providers/providers.service';
-import { ProvidersController } from './controllers/providers/providers.controller';
+import { ProvidersService } from './providers.service';
+import { ProvidersController } from './providers.controller';
 import { Provider } from './providers.entity';
 import { Verification } from './verification.entity';
 import { VerificationHistory } from './verification-history.entity';

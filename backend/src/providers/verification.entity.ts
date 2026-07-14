@@ -7,13 +7,9 @@ import {
   OneToMany,
 } from 'typeorm';
 import { VerificationHistory } from './verification-history.entity';
+import { VerificationStatus } from './verification-status.enum';
 
-export enum VerificationStatus {
-  PENDING = 'pending',
-  APPROVED = 'approved',
-  REJECTED = 'rejected',
-  EXPIRED = 'expired',
-}
+export { VerificationStatus };
 
 @Entity()
 export class Verification {
@@ -37,6 +33,19 @@ export class Verification {
 
   @Column({ nullable: true })
   hwkNumber?: string;
+
+  // There is no public, unified German Handwerkskammer registry API to
+  // check hwkNumber against automatically, so a human must confirm it
+  // against the regional chamber's own register before a verification
+  // with an hwkNumber can be approved. See VerificationService.
+  @Column({ default: false })
+  hwkManuallyVerified: boolean;
+
+  @Column({ nullable: true })
+  hwkVerifiedBy?: string;
+
+  @Column({ nullable: true })
+  hwkVerifiedAt?: Date;
 
   @Column({ nullable: true })
   iban?: string;

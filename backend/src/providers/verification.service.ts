@@ -58,6 +58,16 @@ export class VerificationService {
   ): Promise<Verification> {
     const verification = await this.getVerificationById(id);
 
+    if (
+      status === VerificationStatus.APPROVED &&
+      verification.hwkNumber &&
+      !verification.hwkManuallyVerified
+    ) {
+      throw new BadRequestException(
+        'HWK number must be manually confirmed against the Handwerkskammer register before approval. Call markHwkManuallyVerified first.',
+      );
+    }
+
     // Create history record
     const history = new VerificationHistory();
     history.verificationId = verification.id;
@@ -79,11 +89,30 @@ export class VerificationService {
     return this.verificationRepository.save(verification);
   }
 
-  async validateHwkNumber(hwkNumber: string): Promise<boolean> {
-    // TODO: Implement actual HWK registry validation
-    // For now, just validate format
+  /**
+   * Format-only check. Germany has no unified, public Handwerkskammer
+   * registry API — each of the ~53 regional chambers maintains its own
+   * register — so this cannot confirm the number is real. It only
+   * rejects obviously malformed input at upload time. A human must
+   * separately confirm the number via markHwkManuallyVerified() before
+   * the verification can be approved; see updateVerificationStatus().
+   */
+  async validateHwkNumberFormat(hwkNumber: string): Promise<boolean> {
     const hwkRegex = /^[A-Z]{1,3}-\d{4,8}$/;
     return hwkRegex.test(hwkNumber);
+  }
+
+  /**
+   * Records that an admin manually checked hwkNumber against the
+   * relevant Handwerkskammer's own register. Required before a
+   * verification carrying an hwkNumber can move to APPROVED.
+   */
+  async markHwkManuallyVerified(id: string, adminUserId: string): Promise<Verification> {
+    const verification = await this.getVerificationById(id);
+    verification.hwkManuallyVerified = true;
+    verification.hwkVerifiedBy = adminUserId;
+    verification.hwkVerifiedAt = new Date();
+    return this.verificationRepository.save(verification);
   }
 
   async validateInsuranceExpiry(expiryDate: Date): Promise<boolean> {

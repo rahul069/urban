@@ -5,7 +5,8 @@ import {
   CreateDateColumn,
   ManyToOne,
 } from 'typeorm';
-import { Verification, VerificationStatus } from './verification.entity';
+import { Verification } from './verification.entity';
+import { VerificationStatus } from './verification-status.enum';
 
 @Entity()
 export class VerificationHistory {
@@ -21,7 +22,6 @@ export class VerificationHistory {
   @Column({
     type: 'enum',
     enum: VerificationStatus,
-    enumName: 'verification_status_enum'
   })
   status: VerificationStatus;
 

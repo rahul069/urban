@@ -7,6 +7,7 @@ import { BookingsModule } from '../bookings/bookings.module';
 import { ProvidersModule } from '../providers/providers.module';
 import { CustomersModule } from '../customers/customers.module';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { InvoicesModule } from '../invoices/invoices.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { NotificationsModule } from '../notifications/notifications.module';
     ProvidersModule,
     CustomersModule,
     NotificationsModule,
+    InvoicesModule,
   ],
   controllers: [PaymentsController],
   providers: [PaymentsService],

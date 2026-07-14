@@ -39,6 +39,12 @@ export class ProvidersService {
     return this.providersRepository.save(savedProvider);
   }
 
+  // Alias for getProviderById, kept for callers (InvoicesService,
+  // PaymentsService) written against the CRUD-style findOne name.
+  async findOne(id: string): Promise<Provider> {
+    return this.getProviderById(id);
+  }
+
   async getProviderById(id: string): Promise<Provider> {
     const provider = await this.providersRepository.findOne({
       where: { id },
@@ -61,11 +67,6 @@ export class ProvidersService {
     return provider;
   }
 
-  private async validateHwkNumber(hwkNumber: string): Promise<boolean> {
-    // Mock validation: HWK numbers are 8 digits in Germany
-    return /^\d{8}$/.test(hwkNumber);
-  }
-
   async uploadDocument(
     providerId: string,
     documentType: UploadDocumentDto['documentType'],
@@ -83,7 +84,7 @@ export class ProvidersService {
 
     // Validate HWK number if provided
     if (documentType === 'hwk' && metadata?.hwkNumber) {
-      const isValid = await this.verificationService.validateHwkNumber(metadata.hwkNumber);
+      const isValid = await this.verificationService.validateHwkNumberFormat(metadata.hwkNumber);
       if (!isValid) {
         throw new BadRequestException('Invalid HWK number format');
       }
@@ -140,6 +141,11 @@ export class ProvidersService {
       updateVerificationStatusDto.rejectionReason,
       changedBy,
     );
+  }
+
+  async markHwkManuallyVerified(providerId: string, adminUserId: string): Promise<Verification> {
+    const provider = await this.getProviderById(providerId);
+    return this.verificationService.markHwkManuallyVerified(provider.verification.id, adminUserId);
   }
 
 

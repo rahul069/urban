@@ -12,6 +12,7 @@ import { ProvidersService } from '../../providers/providers.service';
 import { NotificationsService } from '../../notifications/notifications.service';
 import { CustomersService } from '../../customers/customers/customers.service';
 import { InvoiceStatus } from '../../invoices/entities/invoice.entity';
+import { InvoicesService } from '../../invoices/services/invoices/invoices.service';
 
 @Injectable()
 export class PaymentsService {
@@ -24,7 +25,8 @@ export class PaymentsService {
     private readonly providersService: ProvidersService,
     private readonly configService: ConfigService,
     private readonly notificationsService: NotificationsService,
-    // InvoicesService will be injected when needed
+    private readonly customersService: CustomersService,
+    private readonly invoicesService: InvoicesService,
   ) {
     const stripeSecretKey = this.configService.get('STRIPE_SECRET_KEY') || 'sk_test_placeholder';
     this.stripe = new Stripe(stripeSecretKey, {
@@ -122,15 +124,20 @@ export class PaymentsService {
       // Send notifications
       const booking = await this.bookingsService.getBookingById(payment.bookingId);
       const provider = await this.providersService.getProviderById(payment.providerId);
-      const customer = await this.customersService.findOne(payment.customerId);
-       
+
       // Send payment confirmation to provider
       await this.notificationsService.sendEmail(
         provider.email,
         'Zahlungseingang',
         this.generatePaymentReceivedEmail(provider.firstName, payment.amount, booking.serviceType),
       );
-      
+
+      if (!payment.customerId) {
+        console.error(`Payment ${payment.id} has no customerId; skipping invoice generation.`);
+        return updatedPayment;
+      }
+      const customer = await this.customersService.findOne(payment.customerId);
+
       // Generate invoice automatically
       try {
         const invoice = await this.invoicesService.createInvoice({

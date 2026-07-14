@@ -1,24 +1,11 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import * as Sentry from '@sentry/nestjs';
 import { SentryModule as SentryNestModule } from '@sentry/nestjs/setup';
 
+// Sentry.init() itself runs in main.ts, before any other imports, per
+// the @sentry/nestjs setup requirements. This module just wires up the
+// Nest-level interceptors/filters on top of that.
 @Module({
-  imports: [
-    SentryNestModule.forRoot({
-      dsn: process.env.SENTRY_DSN,
-      environment: process.env.NODE_ENV || 'development',
-      debug: process.env.NODE_ENV === 'development',
-      tracesSampleRate: 1.0,
-      integrations: [
-        new Sentry.Integrations.Http({ tracing: true }),
-        new Sentry.Integrations.Express({
-          app: require('express')(),
-        }),
-      ],
-      profilesSampleRate: 1.0,
-    }),
-  ],
+  imports: [SentryNestModule.forRoot()],
   exports: [SentryNestModule],
 })
 export class SentryConfigModule {}

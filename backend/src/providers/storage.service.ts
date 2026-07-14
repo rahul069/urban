@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import type { Express } from 'express';
 import 'multer';
@@ -40,6 +40,24 @@ export class StorageService {
     await this.s3Client.send(command);
     
     return this.getFileUrl(key);
+  }
+
+  async deleteFile(fileUrl: string): Promise<void> {
+    const key = this.extractKeyFromUrl(fileUrl);
+    const command = new DeleteObjectCommand({
+      Bucket: this.bucketName,
+      Key: key,
+    });
+
+    await this.s3Client.send(command);
+  }
+
+  private extractKeyFromUrl(fileUrl: string): string {
+    const prefix = `https://${this.bucketName}.${this.configService.get('S3_ENDPOINT').replace('https://', '')}/`;
+    if (fileUrl.startsWith(prefix)) {
+      return fileUrl.slice(prefix.length);
+    }
+    return new URL(fileUrl).pathname.replace(/^\//, '');
   }
 
   async generatePresignedUrl(key: string): Promise<string> {

@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { InvoicesService } from './invoices.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Invoice, InvoiceStatus } from '../../entities/invoice.entity';
+import { InvoiceSequence } from '../../entities/invoice-sequence.entity';
 import { BookingsService } from '../../../bookings/bookings.service';
 import { ProvidersService } from '../../../providers/providers.service';
 import { CustomersService } from '../../../customers/customers/customers.service';
@@ -9,12 +10,30 @@ import { StorageService } from '../../../providers/storage.service';
 import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm';
 
+const mockInvoiceSequenceRepository = {
+  findOne: jest.fn().mockResolvedValue({ year: 2026, lastNumber: 0 }),
+  save: jest.fn().mockImplementation((seq) => Promise.resolve(seq)),
+};
+
+const mockManager = {
+  query: jest.fn().mockResolvedValue(undefined),
+  getRepository: jest.fn((entity) => {
+    if (entity === InvoiceSequence) {
+      return mockInvoiceSequenceRepository;
+    }
+    return mockInvoiceRepository;
+  }),
+};
+
 const mockInvoiceRepository = {
   create: jest.fn(),
   save: jest.fn(),
   findOne: jest.fn(),
   find: jest.fn(),
   remove: jest.fn(),
+  manager: {
+    transaction: jest.fn((cb: (manager: typeof mockManager) => unknown) => cb(mockManager)),
+  },
 };
 
 const mockBookingsService = {
@@ -22,11 +41,11 @@ const mockBookingsService = {
 };
 
 const mockProvidersService = {
-  getProviderById: jest.fn(),
+  findOne: jest.fn(),
 };
 
 const mockCustomersService = {
-  getCustomerById: jest.fn(),
+  findOne: jest.fn(),
 };
 
 const mockStorageService = {
@@ -117,8 +136,8 @@ describe('InvoicesService', () => {
       };
       
       mockBookingsService.getBookingById.mockResolvedValue(booking);
-      mockProvidersService.getProviderById.mockResolvedValue(provider);
-      mockCustomersService.getCustomerById.mockResolvedValue(customer);
+      mockProvidersService.findOne.mockResolvedValue(provider);
+      mockCustomersService.findOne.mockResolvedValue(customer);
       mockInvoiceRepository.create.mockReturnValue(expectedInvoice);
       mockInvoiceRepository.save.mockResolvedValue(expectedInvoice);
       
@@ -126,8 +145,8 @@ describe('InvoicesService', () => {
       
       expect(result).toEqual(expectedInvoice);
       expect(mockBookingsService.getBookingById).toHaveBeenCalledWith('test-booking-id');
-      expect(mockProvidersService.getProviderById).toHaveBeenCalledWith('test-provider-id');
-      expect(mockCustomersService.getCustomerById).toHaveBeenCalledWith('test-customer-id');
+      expect(mockProvidersService.findOne).toHaveBeenCalledWith('test-provider-id');
+      expect(mockCustomersService.findOne).toHaveBeenCalledWith('test-customer-id');
     });
   });
 

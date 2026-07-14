@@ -134,6 +134,15 @@ export class ProvidersController {
     return this.providersService.getPendingVerifications();
   }
 
+  @Put(':id/verification/hwk-verify')
+  async markHwkManuallyVerified(
+    @Param('id') id: string,
+    @Req() req: Request,
+  ): Promise<Verification> {
+    const adminUserId = req.headers['x-user-id'] as string; // Temporary solution
+    return this.providersService.markHwkManuallyVerified(id, adminUserId);
+  }
+
   @Get(':id/verification/history')
   async getVerificationHistory(
     @Param('id') id: string,

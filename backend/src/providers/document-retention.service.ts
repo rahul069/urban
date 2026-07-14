@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, LessThan } from 'typeorm';
-import { Verification } from './verification.entity';
+import { Repository, LessThan, LessThanOrEqual } from 'typeorm';
+import { Verification, VerificationStatus } from './verification.entity';
 import { StorageService } from './storage.service';
 import { ConfigService } from '@nestjs/config';
 import { Cron, CronExpression } from '@nestjs/schedule';
@@ -34,7 +34,7 @@ export class DocumentRetentionService {
       where: {
         createdAt: LessThan(cutoffDate),
         // Only clean up documents that are not in active use
-        status: 'approved',
+        status: VerificationStatus.APPROVED,
       },
     });
 
@@ -57,10 +57,10 @@ export class DocumentRetentionService {
     // Find rejected documents older than 30 days
     const cutoffDate = subDays(new Date(), 30);
     const rejectedVerifications = await this.verificationRepository.find({
-    where: {
-      createdAt: LessThanOrEqual(cutoffDate),
-      status: 'rejected' as VerificationStatus,
-    },
+      where: {
+        createdAt: LessThanOrEqual(cutoffDate),
+        status: VerificationStatus.REJECTED,
+      },
     });
 
     for (const verification of rejectedVerifications) {
@@ -84,7 +84,7 @@ export class DocumentRetentionService {
       verification.idCardUrl,
       verification.insuranceUrl,
       verification.bankStatementUrl,
-    ].filter(url => url); // Filter out undefined/null URLs
+    ].filter((url): url is string => Boolean(url)); // Filter out undefined/null URLs
 
     for (const url of documentUrls) {
       try {
@@ -98,10 +98,10 @@ export class DocumentRetentionService {
 
   private async anonymizeVerificationData(verification: Verification): Promise<void> {
     // Anonymize personal data while preserving the record for compliance
-    verification.meisterbriefUrl = null;
-    verification.idCardUrl = null;
-    verification.insuranceUrl = null;
-    verification.bankStatementUrl = null;
+    verification.meisterbriefUrl = undefined;
+    verification.idCardUrl = undefined;
+    verification.insuranceUrl = undefined;
+    verification.bankStatementUrl = undefined;
     if (verification.hwkNumber) {
       verification.hwkNumber = this.anonymizeString(verification.hwkNumber);
     }
@@ -109,9 +109,9 @@ export class DocumentRetentionService {
       verification.iban = this.anonymizeString(verification.iban);
     }
     verification.providerId = this.anonymizeString(verification.providerId);
-    
+
     // Mark as anonymized for audit purposes
-    verification.status = 'anonymized' as VerificationStatus;
+    verification.status = VerificationStatus.ANONYMIZED;
     
     await this.verificationRepository.save(verification);
   }

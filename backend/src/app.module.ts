@@ -11,7 +11,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { CacheModule } from '@nestjs/cache-manager';
-// import { ScheduleModule } from '@nestjs/schedule';
+import { ScheduleModule } from '@nestjs/schedule';
 import { TerminusModule } from '@nestjs/terminus';
 import { HttpModule } from '@nestjs/axios';
 import * as redisStore from 'cache-manager-redis-store';
@@ -44,8 +44,9 @@ import { CustomersModule } from './customers/customers.module';
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_DATABASE'),
         entities: [__dirname + '/**/*.entity{.ts,.js}', Invoice],
-        synchronize: true, // Disable in production
-        logging: true,
+        migrations: [__dirname + '/migrations/*{.ts,.js}'],
+        synchronize: configService.get('NODE_ENV') !== 'production',
+        logging: configService.get('NODE_ENV') !== 'production',
       }),
       inject: [ConfigService],
     }),
@@ -70,6 +71,7 @@ import { CustomersModule } from './customers/customers.module';
       isGlobal: true,
     }),
 
+    ScheduleModule.forRoot(),
     TerminusModule,
     HttpModule,
     SentryConfigModule,

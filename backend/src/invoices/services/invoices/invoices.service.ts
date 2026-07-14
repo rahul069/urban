@@ -1,7 +1,8 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { Invoice, InvoiceStatus } from '../../entities/invoice.entity';
+import { InvoiceSequence } from '../../entities/invoice-sequence.entity';
 import { CreateInvoiceDto } from '../../dto/create-invoice.dto';
 import { UpdateInvoiceDto } from '../../dto/update-invoice.dto';
 import { BookingsService } from '../../../bookings/bookings.service';
@@ -10,16 +11,9 @@ import { CustomersService } from '../../../customers/customers/customers.service
 import { StorageService } from '../../../providers/storage.service';
 import { ConfigService } from '@nestjs/config';
 import PDFDocument from 'pdfkit';
-declare module 'pdfkit' {
-  namespace PDFKit {
-    interface PDFDocument {
-      [key: string]: any;
-    }
-  }
-}
 import * as fs from 'fs';
 import * as path from 'path';
-import { format } from 'date-fns';
+import { format, addDays } from 'date-fns';
 import { de } from 'date-fns/locale';
 
 @Injectable()
@@ -36,23 +30,63 @@ export class InvoicesService {
 
   async createInvoice(createInvoiceDto: CreateInvoiceDto): Promise<Invoice> {
     const booking = await this.bookingsService.getBookingById(createInvoiceDto.bookingId);
-    
+
     if (!booking) {
       throw new NotFoundException('Booking not found');
     }
-    
+
     const provider = await this.providersService.findOne(booking.providerId);
     const customer = await this.customersService.findOne(booking.customerId);
-    
-    const invoice = this.invoiceRepository.create({
-      ...createInvoiceDto,
-      bookingId: booking.id,
-      providerId: provider.id,
-      customerId: customer.id,
-      status: createInvoiceDto.status || InvoiceStatus.DRAFT,
+
+    return this.invoiceRepository.manager.transaction(async (manager) => {
+      const issueDate = createInvoiceDto.issueDate ? new Date(createInvoiceDto.issueDate) : new Date();
+      const dueDate = createInvoiceDto.dueDate ? new Date(createInvoiceDto.dueDate) : addDays(issueDate, 14);
+      // Invoice numbers are generated server-side only (§14 UStG requires
+      // gapless sequential numbering) — never accept one from the client.
+      const invoiceNumber = await this.generateInvoiceNumber(manager, issueDate);
+
+      const invoiceRepo = manager.getRepository(Invoice);
+      const invoice = invoiceRepo.create({
+        ...createInvoiceDto,
+        bookingId: booking.id,
+        providerId: provider.id,
+        customerId: customer.id,
+        status: createInvoiceDto.status || InvoiceStatus.DRAFT,
+        taxRate: createInvoiceDto.taxRate ?? 19.0,
+        invoiceNumber,
+        issueDate,
+        dueDate,
+      });
+
+      return invoiceRepo.save(invoice);
     });
-    
-    return this.invoiceRepository.save(invoice);
+  }
+
+  /**
+   * Locks the current year's counter row and returns the next gapless
+   * invoice number. Must run inside the same transaction as the invoice
+   * insert so a failed invoice creation doesn't burn a number.
+   */
+  private async generateInvoiceNumber(manager: EntityManager, issueDate: Date): Promise<string> {
+    const year = issueDate.getFullYear();
+    const sequenceRepo = manager.getRepository(InvoiceSequence);
+
+    await manager.query(
+      `INSERT INTO invoice_sequence (year, "lastNumber") VALUES ($1, 0) ON CONFLICT (year) DO NOTHING`,
+      [year],
+    );
+    const sequence = await sequenceRepo.findOne({
+      where: { year },
+      lock: { mode: 'pessimistic_write' },
+    });
+    if (!sequence) {
+      throw new Error(`Failed to acquire invoice sequence for year ${year}`);
+    }
+
+    sequence.lastNumber += 1;
+    await sequenceRepo.save(sequence);
+
+    return `RE-${year}-${String(sequence.lastNumber).padStart(6, '0')}`;
   }
 
   async generateInvoicePdf(invoiceId: string): Promise<string> {
@@ -79,15 +113,15 @@ export class InvoicesService {
     // Add content to PDF
     this.addInvoiceHeader(pdfDoc, provider);
     this.addInvoiceDetails(pdfDoc, invoice, booking, provider, customer);
-    this.addInvoiceItems(pdfDoc, booking);
+    this.addInvoiceItems(pdfDoc, booking, invoice);
     this.addInvoiceFooter(pdfDoc, invoice);
     
     // Finalize PDF
     pdfDoc.end();
     
     // Wait for PDF to be written
-    await new Promise((resolve, reject) => {
-      writeStream.on('finish', resolve);
+    await new Promise<void>((resolve, reject) => {
+      writeStream.on('finish', () => resolve());
       writeStream.on('error', reject);
     });
     
@@ -227,7 +261,7 @@ export class InvoicesService {
     pdfDoc.text(`Leistungsdatum: ${format(booking.scheduledAt, 'dd.MM.yyyy', { locale: de })}`, 50, currentY + 40);
   }
 
-  private addInvoiceItems(pdfDoc: PDFKit.PDFDocument, booking: any) {
+  private addInvoiceItems(pdfDoc: PDFKit.PDFDocument, booking: any, invoice: Invoice) {
     // Add items table
     const startY = 400;
     let currentY = startY;
@@ -262,8 +296,9 @@ export class InvoicesService {
     pdfDoc.text(`Zwischensumme: ${booking.totalAmount.toFixed(2)} €`, 400, currentY, { align: 'right' });
     currentY += 20;
     
-    if (booking.taxAmount) {
-      pdfDoc.text(`Mehrwertsteuer (19%): ${booking.taxAmount.toFixed(2)} €`, 400, currentY, { align: 'right' });
+    if (invoice.taxAmount) {
+      const rate = Number(invoice.taxRate ?? 19);
+      pdfDoc.text(`Mehrwertsteuer (${rate.toFixed(0)}%): ${invoice.taxAmount.toFixed(2)} €`, 400, currentY, { align: 'right' });
       currentY += 20;
     }
     
@@ -294,7 +329,8 @@ export class InvoicesService {
     // In a real implementation, you would use a proper ZUGFeRD library
     const issueDate = invoice.issueDate || new Date();
     const dueDate = invoice.dueDate || new Date();
-    
+    const taxRate = Number(invoice.taxRate ?? 19).toFixed(2);
+
     return `<?xml version="1.0" encoding="UTF-8"?>
 <rsm:CrossIndustryInvoice xmlns:rsm="urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100"
                           xmlns:udt="urn:un:unece:uncefact:data:standard:UnqualifiedDataType:100">
@@ -349,7 +385,7 @@ export class InvoicesService {
         <rsm:CalculatedAmount>${invoice.taxAmount || 0}</rsm:CalculatedAmount>
         <rsm:TypeCode>VAT</rsm:TypeCode>
         <rsm:BasisAmount>${invoice.amount}</rsm:BasisAmount>
-        <rsm:ApplicablePercent>19.00</rsm:ApplicablePercent>
+        <rsm:ApplicablePercent>${taxRate}</rsm:ApplicablePercent>
       </rsm:ApplicableTradeTax>
       <rsm:SpecifiedTradePaymentTerms>
         <rsm:Description>${invoice.paymentTerms || 'Zahlbar innerhalb von 14 Tagen'}</rsm:Description>
@@ -390,7 +426,7 @@ export class InvoicesService {
       <rsm:SpecifiedLineTradeSettlement>
         <rsm:ApplicableTradeTax>
           <rsm:TypeCode>VAT</rsm:TypeCode>
-          <rsm:ApplicablePercent>19.00</rsm:ApplicablePercent>
+          <rsm:ApplicablePercent>${taxRate}</rsm:ApplicablePercent>
         </rsm:ApplicableTradeTax>
         <rsm:SpecifiedTradeSettlementMonetarySummation>
           <rsm:LineTotalAmount>${invoice.amount}</rsm:LineTotalAmount>

@@ -22,13 +22,13 @@ export class CreateInvoiceDto {
   @IsNotEmpty()
   totalAmount: number;
 
-  @IsString()
+  @IsNumber()
   @IsOptional()
-  description?: string;
+  taxRate?: number;
 
   @IsString()
   @IsOptional()
-  invoiceNumber?: string;
+  description?: string;
 
   @IsString()
   @IsOptional()

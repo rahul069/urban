@@ -12,12 +12,29 @@ import { MonitoringService } from './monitoring.service';
           prefix: 'urban_',
         },
       },
-      controller: {
-        path: '/metrics',
-      },
     }),
   ],
-  providers: [MonitoringService],
+  providers: [
+    MonitoringService,
+    makeCounterProvider({
+      name: 'urban_http_requests_total',
+      help: 'Total number of HTTP requests',
+      labelNames: ['method', 'path', 'status_code'],
+    }),
+    makeHistogramProvider({
+      name: 'urban_http_request_duration_seconds',
+      help: 'HTTP request duration in seconds',
+      labelNames: ['method', 'path'],
+    }),
+    makeGaugeProvider({
+      name: 'urban_active_users',
+      help: 'Number of currently active users',
+    }),
+    makeGaugeProvider({
+      name: 'urban_database_connections',
+      help: 'Number of active database connections',
+    }),
+  ],
   exports: [MonitoringService],
 })
 export class MonitoringModule {}

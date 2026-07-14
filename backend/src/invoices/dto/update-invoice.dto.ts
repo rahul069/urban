@@ -18,13 +18,13 @@ export class UpdateInvoiceDto {
   @IsOptional()
   totalAmount?: number;
 
-  @IsString()
+  @IsNumber()
   @IsOptional()
-  description?: string;
+  taxRate?: number;
 
   @IsString()
   @IsOptional()
-  invoiceNumber?: string;
+  description?: string;
 
   @IsString()
   @IsOptional()

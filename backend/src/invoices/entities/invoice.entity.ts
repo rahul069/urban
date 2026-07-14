@@ -51,6 +51,11 @@ export class Invoice {
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   taxAmount?: number;
 
+  // VAT rate applied to this invoice, as a percent (e.g. 19.00, 7.00, or
+  // 0.00 for Kleinunternehmer / reverse-charge / tax-exempt cases).
+  @Column({ type: 'decimal', precision: 4, scale: 2, default: 19.0 })
+  taxRate: number;
+
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   discountAmount?: number;
 
